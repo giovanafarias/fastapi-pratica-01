@@ -10,6 +10,8 @@ from app.models.disciplina import Disciplina
 from app.models.matricula import Matricula
 from app.schemas import MatriculaCreate, MatriculaResponse
 
+from app.core import requer_coordenador, requer_professor_ou_coordenador
+
 router = APIRouter(
     prefix="/matriculas",
     tags=["Matriculas"]
@@ -21,6 +23,8 @@ router = APIRouter(
 async def criar_matricula(
     dados: MatriculaCreate, 
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_coordenador)
+
 ):
     result_aluno = await db.execute(select(Aluno).where(Aluno.id == dados.aluno_id))
     aluno_existe = result_aluno.scalar_one_or_none()
@@ -67,6 +71,8 @@ async def criar_matricula(
 @router.get("", response_model=List[MatriculaResponse])
 async def listar_matriculas(
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_professor_ou_coordenador)
+
 ):
     statement = select(Matricula).options(
         selectinload(Matricula.aluno),
@@ -82,6 +88,8 @@ async def buscar_matricula(
     aluno_id: int, 
     disciplina_id: int, 
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_professor_ou_coordenador)
+
 ):
     statement = (
         select(Matricula)
@@ -108,6 +116,8 @@ async def deletar_matricula(
     aluno_id: int, 
     disciplina_id: int, 
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_coordenador)
+
 ):
     statement = select(Matricula).where(
         Matricula.aluno_id == aluno_id,

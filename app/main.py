@@ -3,6 +3,7 @@ from app.endpoints import aluno_router
 from app.endpoints import curso_router
 from app.endpoints import disciplina_router
 from app.endpoints import matricula_router
+from app.endpoints import auth_router
 
 app = FastAPI(
     title="Sistema Acadêmico - Modular",
@@ -10,6 +11,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.include_router(auth_router)
 app.include_router(aluno_router)
 app.include_router(curso_router)
 app.include_router(disciplina_router)

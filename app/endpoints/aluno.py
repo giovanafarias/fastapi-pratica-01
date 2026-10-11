@@ -10,6 +10,8 @@ from app.models.curso import Curso
 from app.models.matricula import Matricula
 from app.schemas import AlunoCreate, AlunoResponse
 
+from app.core import requer_coordenador, requer_professor_ou_coordenador, requer_professor
+
 router = APIRouter(
     prefix="/alunos",
     tags=["Alunos"]
@@ -20,6 +22,7 @@ router = APIRouter(
 async def criar_aluno(
     dados: AlunoCreate, 
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_professor)
 ):
     result_curso = await db.execute(select(Curso).where(Curso.id == dados.curso_id))
     curso_existe = result_curso.scalar_one_or_none()
@@ -52,6 +55,7 @@ async def criar_aluno(
 @router.get("", response_model=List[AlunoResponse])
 async def listar_alunos(
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_professor_ou_coordenador)
 ):
     statement = select(Aluno).options(
         selectinload(Aluno.curso),
@@ -66,6 +70,8 @@ async def listar_alunos(
 async def buscar_aluno(
     aluno_id: int, 
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_professor_ou_coordenador)
+
 ):
     statement = select(Aluno).options(
         selectinload(Aluno.curso),
@@ -85,6 +91,8 @@ async def atualizar_aluno(
     aluno_id: int, 
     dados: AlunoCreate, 
     db: AsyncSession = Depends(get_db),
+    _=Depends(requer_professor)
+
 ):
     result_aluno = await db.execute(select(Aluno).where(Aluno.id == aluno_id))
     aluno = result_aluno.scalar_one_or_none()
@@ -125,6 +133,7 @@ async def atualizar_aluno(
 async def deletar_aluno(
     aluno_id: int, db: 
     AsyncSession = Depends(get_db),
+    _=Depends(requer_professor)
 ):
     result = await db.execute(select(Aluno).where(Aluno.id == aluno_id))
     aluno = result.scalar_one_or_none()
